@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "project": "Dnipro",
+  "adapter": "maple",
+  "name": "Maple / Syrup",
+  "category": "Real World Asset",
+  "programId": "Ht1uo1tiXUjPouaNmDxqNpGN5K7jNi4jGJq6crZPrPcv",
+  "status": "reference",
+  "underlying": "USDC",
+  "notes": "Chain support, token contracts, and withdrawal semantics must be verified before live registration.",
+  "repository": "https://github.com/QebadiHice/dnipro",
+  "x": "https://x.com/angelraptumde"
+}

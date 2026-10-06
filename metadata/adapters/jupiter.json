@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "project": "Dnipro",
+  "adapter": "jupiter",
+  "name": "Jupiter LP (JLP)",
+  "category": "Liquidity",
+  "programId": "Eh9e2Q55pKimA7TA5z6qoGi92xXqqYEKagdv1pvwCfLi",
+  "status": "reference",
+  "underlying": "USDC",
+  "notes": "Underlying Jupiter route and required pool accounts must be verified before live registration.",
+  "repository": "https://github.com/QebadiHice/dnipro",
+  "x": "https://x.com/angelraptumde"
+}

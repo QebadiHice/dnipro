@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "project": "Dnipro",
+  "adapter": "drift",
+  "name": "Drift Insurance Fund",
+  "category": "Insurance",
+  "programId": "8ZEWPwXBjTG3DsP2sJLYpgf5iTgGay4C8YJoc5mb4YP8",
+  "status": "reference",
+  "underlying": "USDC",
+  "notes": "Insurance-fund staking and cooldown rules must be implemented and verified before live registration.",
+  "repository": "https://github.com/QebadiHice/dnipro",
+  "x": "https://x.com/angelraptumde"
+}

@@ -1,0 +1,29 @@
+[toolchain]
+anchor_version = "0.31.1"
+solana_version = "2.2.20"
+
+[features]
+seeds = true
+skip-lint = false
+
+[programs.localnet]
+dispatcher  = "9pBagrmLndcGR6fGBwaEqtuEb5qp1EipDX3mHh7VGJLQ"
+registry    = "EXm2s98kb6eiYemAMc56NNF8wGHFW5NA4j4F9tpkp9ZS"
+kamino_adapter   = "GENyHjfFyapa8AA8HaxLvZE9eZ3uMFca18d26RJJ9DxB"
+marginfi_adapter = "7s7FUYn9h5gtjaUpMjDTuaAEcNH9Zm2g6JYaJ9gY76SP"
+jupiter_adapter  = "Eh9e2Q55pKimA7TA5z6qoGi92xXqqYEKagdv1pvwCfLi"
+maple_adapter    = "Ht1uo1tiXUjPouaNmDxqNpGN5K7jNi4jGJq6crZPrPcv"
+drift_adapter    = "8ZEWPwXBjTG3DsP2sJLYpgf5iTgGay4C8YJoc5mb4YP8"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[test]
+startup_wait = 5000

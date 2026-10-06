@@ -1,0 +1,20 @@
+[package]
+name = "dispatcher"
+version = "0.1.0"
+description = "Dnipro Universal Yield Adapter - Dispatcher Program"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "dispatcher"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor-spl  = { workspace = true }

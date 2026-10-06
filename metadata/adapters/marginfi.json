@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "project": "Dnipro",
+  "adapter": "marginfi",
+  "name": "MarginFi USDC",
+  "category": "Lending",
+  "programId": "7s7FUYn9h5gtjaUpMjDTuaAEcNH9Zm2g6JYaJ9gY76SP",
+  "status": "reference",
+  "underlying": "USDC",
+  "notes": "Underlying MarginFi CPI must be completed and verified before live registration.",
+  "repository": "https://github.com/QebadiHice/dnipro",
+  "x": "https://x.com/angelraptumde"
+}

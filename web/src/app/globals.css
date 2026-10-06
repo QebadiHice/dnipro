@@ -1,0 +1,149 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/*
+  Design system: "River" — Dnipro's visual identity is built around the
+  river itself. Deep teal/ink water tones, a warm wheat-field accent
+  (callback to the Ukrainian landscape without being literal), a serif
+  display face for editorial moments, and hand-drawn river contour lines
+  as the recurring motif instead of generic glow/gradient blobs.
+*/
+
+@layer base {
+  :root {
+    --background: 165 45% 5%;
+    --foreground: 60 9% 94%;
+    --card: 165 35% 7%;
+    --card-foreground: 60 9% 94%;
+    --popover: 165 35% 7%;
+    --popover-foreground: 60 9% 94%;
+    --primary: 168 32% 41%;
+    --primary-foreground: 165 45% 5%;
+    --secondary: 168 18% 14%;
+    --secondary-foreground: 60 9% 94%;
+    --muted: 168 18% 12%;
+    --muted-foreground: 168 12% 60%;
+    --accent: 38 71% 53%;
+    --accent-foreground: 165 45% 5%;
+    --destructive: 6 70% 50%;
+    --destructive-foreground: 60 9% 94%;
+    --border: 168 18% 17%;
+    --input: 168 18% 17%;
+    --ring: 38 71% 53%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    background-image:
+      radial-gradient(ellipse 1200px 600px at 50% -10%, rgba(58,171,158,0.08), transparent 60%);
+  }
+  html { scroll-behavior: smooth; }
+}
+
+@layer utilities {
+  /* Card surface — replaces generic "glassmorphism" with a flat,
+     paper-like surface and a single accent rule on top. No blur. */
+  .surface {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    position: relative;
+  }
+  .surface::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5) 20%, hsl(var(--accent) / 0.6) 80%, transparent);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .surface:hover::before {
+    opacity: 1;
+  }
+
+  .surface-flat {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Editorial heading treatment */
+  .heading-serif {
+    font-family: var(--font-serif, 'Fraunces', serif);
+    font-feature-settings: "ss01" 1;
+    letter-spacing: -0.01em;
+  }
+
+  .accent-text {
+    color: hsl(var(--accent));
+  }
+
+  /* River contour underline — used instead of generic gradient text */
+  .river-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .river-underline::after {
+    content: '';
+    position: absolute;
+    left: 2%;
+    right: 2%;
+    bottom: -0.08em;
+    height: 0.18em;
+    background: hsl(var(--accent) / 0.35);
+    border-radius: 2px;
+    transform: rotate(-0.6deg);
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border: 1px solid hsl(var(--border));
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.25);
+  }
+  .glow-green {
+    box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.2);
+  }
+
+  .shimmer-bg {
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.08), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+}
+
+/* Wallet adapter overrides — match the river/wheat palette */
+.wallet-adapter-button {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+  border-radius: var(--radius) !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  height: 40px !important;
+  padding: 0 20px !important;
+  transition: all 0.15s !important;
+}
+.wallet-adapter-button:hover {
+  background: hsl(38 71% 48%) !important;
+  transform: translateY(-1px) !important;
+}
+.wallet-adapter-modal-wrapper {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}

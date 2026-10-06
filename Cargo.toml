@@ -1,0 +1,17 @@
+[workspace]
+members = [
+    "programs/dispatcher",
+    "programs/registry",
+    "programs/adapters/kamino",
+    "programs/adapters/marginfi",
+    "programs/adapters/jupiter",
+    "programs/adapters/maple",
+    "programs/adapters/drift",
+]
+resolver = "2"
+
+[workspace.dependencies]
+anchor-lang = { version = "0.31.1", features = ["init-if-needed"] }
+anchor-spl = { version = "0.31.1", features = ["token", "associated_token"] }
+solana-program = "2.2.20"
+borsh = "0.10"

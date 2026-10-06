@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "project": "Dnipro",
+  "adapter": "kamino",
+  "name": "Kamino USDC",
+  "category": "Lending",
+  "programId": "GENyHjfFyapa8AA8HaxLvZE9eZ3uMFca18d26RJJ9DxB",
+  "status": "reference",
+  "underlying": "USDC",
+  "notes": "Underlying Kamino CPI must be completed and verified before live registration.",
+  "repository": "https://github.com/QebadiHice/dnipro",
+  "x": "https://x.com/angelraptumde"
+}

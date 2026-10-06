@@ -1,0 +1,39 @@
+# Rust / Anchor
+target/
+.anchor/
+**/*.so
+**/*.keypair.json
+
+# Node
+node_modules/
+dist/
+.next/
+out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Deployment artifacts (keep examples, ignore real keys)
+deployment-mainnet-beta.json
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+yarn-error.log
+
+# Test artifacts
+test-ledger/
+.mocharc*
+
+# Vercel
+.vercel/

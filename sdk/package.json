@@ -1,0 +1,31 @@
+{
+  "name": "@dnipro/sdk",
+  "version": "0.1.0",
+  "description": "Dnipro Universal Yield Adapter Standard — TypeScript SDK",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "src"],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "vitest run",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": ["solana", "defi", "yield", "anchor", "dnipro"],
+  "license": "MIT",
+  "peerDependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@solana/web3.js": "^1.98.0"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.5",
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
+  },
+  "dependencies": {
+    "@solana/spl-token": "^0.4.6",
+    "bn.js": "^5.2.1"
+  }
+}

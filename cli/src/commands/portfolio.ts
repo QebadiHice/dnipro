@@ -1,0 +1,1 @@
+export { portfolioCommand } from './inspect';

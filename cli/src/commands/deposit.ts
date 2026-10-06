@@ -1,0 +1,1 @@
+export { depositCommand } from './inspect';
