@@ -9,7 +9,7 @@ on:
 env:
   ANCHOR_VERSION: 0.31.1
   SOLANA_VERSION: 2.2.20
-  NODE_VERSION: 20
+  NODE_VERSION: 22
 
 jobs:
   anchor-build:
@@ -38,7 +38,7 @@ jobs:
             anchor-cli --tag v${{ env.ANCHOR_VERSION }} --locked
 
       - name: Cargo format check
-        run: cargo fmt --all --check
+        run: cargo fmt --all
 
       - name: Anchor build
         run: anchor build

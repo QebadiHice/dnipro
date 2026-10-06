@@ -1,6 +1,6 @@
-# ⚡ Dnipro — Universal Yield Adapter Layer for Solana
+# ⚡ Dnipro: Universal Yield Adapter Layer for Solana
 
-> One integration for Solana yield venues — built as an open-source submission for Crypto World's Fair 2026 and the Superteam UK Build for Breakpoint ecosystem.
+> One integration for Solana yield venues, built as an open-source submission for Crypto World's Fair 2026 and the Superteam UK Build for Breakpoint ecosystem.
 
 Dnipro is an open-source adapter-layer architecture for giving Solana applications, wallets, and treasury products one interface for discovering and routing into yield venues. Instead of integrating every protocol independently, an app can integrate the Dnipro dispatcher once and address adapters through the same deposit, withdraw, and current-value surface.
 
@@ -146,7 +146,7 @@ See [`docs/colosseum-checklist.md`](docs/colosseum-checklist.md) for the remaini
 Dnipro is being prepared for **Crypto World's Fair 2026 / Colosseum** and **Superteam UK Build for Breakpoint**. Those programs are submission channels and communities around the project; they do not own or operate Dnipro.
 
 - X: [@angelraptumde](https://x.com/angelraptumde)
-- GitHub: [QebadiHice/dnipro](https://github.com/QebadiHice/dnipro)
+- GitHub: [QebadiHice77/dnipro](https://github.com/QebadiHice/dnipro)
 
 ## Security
 
