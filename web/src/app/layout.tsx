@@ -5,7 +5,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
-  title: 'Dnipro — Universal Yield Adapter Layer for Solana',
+  title: 'Dnipro: Universal Yield Adapter Layer for Solana',
   description:
     'Dnipro gives Solana apps, wallets, and treasury products one governed adapter interface for multiple yield venues.',
   keywords: ['solana', 'defi', 'yield', 'adapter', 'treasury', 'kamino', 'marginfi', 'jupiter', 'maple', 'drift'],
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'Dnipro — One interface for Solana yield',
+    title: 'Dnipro: One interface for Solana yield',
     description: 'A governance-gated adapter layer for Solana yield integrations.',
     creator: '@angelraptumde',
   },

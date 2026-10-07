@@ -52,7 +52,7 @@ export function HeroSection() {
               className="text-lg text-muted-foreground max-w-xl mb-10"
             >
               Dnipro gives Solana apps, wallets, and treasury products one governed adapter layer
-              for discovering and routing into yield venues — without rebuilding every protocol integration.
+              for discovering and routing into yield venues without rebuilding every protocol integration.
             </motion.p>
 
             <motion.div

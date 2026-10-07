@@ -89,7 +89,7 @@ anchor build
 anchor test
 ```
 
-The public keys committed in this repository are **reference IDs only**. Run `anchor keys sync` followed by `npm run sync:ids` before your deployment. Commit only the resulting public addresses and source changes — never private keypair files.
+The public keys committed in this repository are **reference IDs only**. Run `anchor keys sync` followed by `npm run sync:ids` before your deployment. Commit only the resulting public addresses and source changes never private keypair files.
 
 ## SDK
 
@@ -146,7 +146,7 @@ See [`docs/colosseum-checklist.md`](docs/colosseum-checklist.md) for the remaini
 Dnipro is being prepared for **Crypto World's Fair 2026 / Colosseum** and **Superteam UK Build for Breakpoint**. Those programs are submission channels and communities around the project; they do not own or operate Dnipro.
 
 - X: [@angelraptumde](https://x.com/angelraptumde)
-- GitHub: [QebadiHice77/dnipro](https://github.com/QebadiHice/dnipro)
+- GitHub: [QebadiHice/dnipro](https://github.com/QebadiHice/dnipro)
 
 ## Security
 
