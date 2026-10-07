@@ -19,7 +19,7 @@ export function VerificationSection() {
               Dnipro is structured so every important claim can eventually resolve to source code, a deployed program, or a real transaction signature.
             </p>
             <a
-              href="https://github.com/QebadiHice/dnipro"
+              href="https://github.com/QebadiHice75/dnipro"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-sm font-semibold text-wheat-300 hover:text-wheat-200"

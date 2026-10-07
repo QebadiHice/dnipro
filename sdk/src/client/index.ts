@@ -143,7 +143,7 @@ export class DniproClient {
     amount: BN
   ): Promise<SimulationResult> {
     const config = await this.getDispatcherConfig();
-    const feeBps = config?.feeBps ?? 30;
+    const feeBps = config?.feeBps ?? 0;
 
     const fee = amount.muln(feeBps).divn(BPS_DENOMINATOR);
     const netAmount = amount.sub(fee);
@@ -166,8 +166,10 @@ export class DniproClient {
     user: PublicKey;
     adapterProgramId: PublicKey;
     underlyingMint: PublicKey;
+    adapterState: PublicKey;
     adapterVault: PublicKey;
-    feeRecipientAccount: PublicKey;
+    adapterVaultAuthority: PublicKey;
+    feeRecipientAccount?: PublicKey;
     deposit: DepositParams;
   }): Transaction {
     const tx = new Transaction();
@@ -191,7 +193,7 @@ export class DniproClient {
     shares: BN
   ): Promise<SimulationResult> {
     const config = await this.getDispatcherConfig();
-    const feeBps = config?.feeBps ?? 30;
+    const feeBps = config?.feeBps ?? 0;
     const fee = shares.muln(feeBps).divn(BPS_DENOMINATOR);
     const netAmount = shares.sub(fee);
 
@@ -208,8 +210,10 @@ export class DniproClient {
     user: PublicKey;
     adapterProgramId: PublicKey;
     underlyingMint: PublicKey;
+    adapterState: PublicKey;
     adapterVault: PublicKey;
-    feeRecipientAccount: PublicKey;
+    adapterVaultAuthority: PublicKey;
+    feeRecipientAccount?: PublicKey;
     withdraw: WithdrawParams;
   }): Transaction {
     const tx = new Transaction();

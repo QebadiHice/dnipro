@@ -1,23 +1,27 @@
 # Dnipro — Colosseum / Build for Breakpoint checklist
 
-This file is intentionally practical: it separates what is already in the repository from what must be proven before submission.
+This checklist separates what exists in the repository from what still needs on-chain proof before submission.
 
 ## Product story
 
 - [x] Clear target: Solana apps, wallets, and treasury products that would otherwise integrate yield venues one by one.
 - [x] One-sentence value proposition visible in the hero.
-- [x] Architecture explains dispatcher, registry, adapters, SDK, and reference app.
-- [x] Repository does not claim simulated activity is real activity.
+- [x] Architecture explains Dispatcher, Registry, adapters, SDK, and reference app.
+- [x] Reference protocol routes are clearly separated from live on-chain behavior.
 
 ## On-chain proof
 
-- [ ] Run `anchor build && anchor keys sync && npm run sync:ids && anchor build` with deployment keypairs generated locally.
-- [ ] Deploy dispatcher + registry to devnet.
-- [ ] Complete one adapter's real CPI to its underlying protocol.
-- [ ] Deploy that adapter and register it.
-- [ ] Execute deposit + withdraw from a wallet through the dispatcher.
-- [ ] Add real Solscan program/transaction links to the submission.
+- [x] Core Devnet program identities created: Dispatcher + Registry.
+- [ ] Upgrade the existing Playground Registry with `playground/registry-lib.rs` and deploy it under the same Registry ID.
+- [ ] Upgrade the existing Playground Dispatcher with `playground/dispatcher-lib.rs` and deploy it under the same Dispatcher ID.
+- [ ] Create/deploy the `dnipro-devnet-vault` Playground program from `playground/devnet-vault-lib.rs`.
+- [ ] Put the new adapter public ID in `NEXT_PUBLIC_LIVE_ADAPTER_PROGRAM_ID` locally and in Vercel.
+- [ ] Use **Initialize live demo** once from the dashboard to create the v2 PDAs and register the adapter.
+- [ ] Execute a real test-USDC deposit through Dispatcher → Registry-gated adapter → SPL vault.
+- [ ] Execute a real withdrawal and confirm the wallet balance returns.
+- [ ] Save real Solscan transaction links for the pitch/demo.
 - [ ] Record a backup demo video in case the RPC or wallet fails during Demo Day.
+- [ ] After the routing proof is stable, replace the vault proof with the first verified external-protocol CPI adapter.
 
 ## PMF evidence
 
@@ -62,13 +66,13 @@ Use real evidence only.
 A Solana product that wants multiple yield venues has to repeatedly integrate different accounts, instructions, receipts, and withdrawal rules.
 
 **0:35–1:15 — Dnipro**  
-Show the adapter interface, dispatcher, and registry. Explain why one integration is the wedge.
+Show the adapter interface, Dispatcher, and Registry. Explain why one integration is the wedge.
 
 **1:15–3:10 — Live proof**  
-Connect wallet → choose the live adapter → deposit → show confirmation → show position → withdraw or show the withdrawal path → open Solscan.
+Connect wallet → choose **Dnipro USDC Devnet Vault** → deposit → approve in Phantom → show confirmation → show on-chain position/vault → withdraw → open Solscan.
 
 **3:10–4:10 — Developer proof**  
-Show the TypeScript SDK and `dnipro generate` CLI. Explain how a second app/protocol integrates.
+Show the TypeScript SDK and common route interface. Explain how an external protocol adapter plugs into the same Dispatcher path.
 
 **4:10–5:00 — PMF + growth**  
-Show real user conversations, repeat usage, cost model, and the acquisition loop. End with the next measurable milestone, not a generic roadmap.
+Show real user conversations, repeat usage, cost model, and the acquisition loop. End with the next measurable milestone.

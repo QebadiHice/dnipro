@@ -7,8 +7,8 @@ seeds = true
 skip-lint = false
 
 [programs.localnet]
-dispatcher  = "9pBagrmLndcGR6fGBwaEqtuEb5qp1EipDX3mHh7VGJLQ"
-registry    = "EXm2s98kb6eiYemAMc56NNF8wGHFW5NA4j4F9tpkp9ZS"
+dispatcher  = "BfSctTciPvzNL3KwkNsQnqUmr5tK9R5B7zz6MCT845rt"
+registry    = "JBSNe6wmCMiJXemkHm7qTRNFaPDd8sjJdwwjYGiAgkfe"
 kamino_adapter   = "GENyHjfFyapa8AA8HaxLvZE9eZ3uMFca18d26RJJ9DxB"
 marginfi_adapter = "7s7FUYn9h5gtjaUpMjDTuaAEcNH9Zm2g6JYaJ9gY76SP"
 jupiter_adapter  = "Eh9e2Q55pKimA7TA5z6qoGi92xXqqYEKagdv1pvwCfLi"

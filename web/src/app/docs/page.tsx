@@ -124,17 +124,18 @@ pub fn adapter_current_value(ctx, shares) -> Result<u64>`,
               {
                 step: '03',
                 title: 'Build and deploy',
-                code: `$ anchor build -p my-protocol-adapter
-$ anchor deploy -p my-protocol-adapter --provider.cluster devnet`,
-                desc: 'Deploy and verify on devnet first. Promote to mainnet only after the integration and account constraints are proven.',
+                code: `# Colosseum demo path
+# Create an Anchor project in Solana Playground
+# Build → copy the generated program ID → Deploy`,
+                desc: 'For the current hackathon build, Solana Playground is the canonical Devnet deployment path. Local Anchor remains useful for development when identities are managed deliberately.',
               },
               {
                 step: '04',
                 title: 'Register after verification',
-                code: `$ dnipro register my-protocol
-# CLI helper is currently a guided stub; use scripts/register-adapter.ts
-# only after the deployed adapter has been verified`,
-                desc: 'The current Registry supports governance-authority registration. Complete policy/timelock enforcement before describing the flow as fully decentralized governance.',
+                code: `# Register only after verification
+# The live demo dashboard registers the deployed Devnet Vault
+# through the Registry governance authority`,
+                desc: 'The Registry allowlists the adapter program, mint, state and vault accounts. External protocol routes should remain reference-only until their CPI path is verified.',
               },
             ].map(({ step, title, code, desc }) => (
               <div key={step} className="flex gap-5">

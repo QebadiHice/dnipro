@@ -22,7 +22,7 @@ export function CTASection() {
                 Open reference app <ArrowRight className="h-4 w-4" />
               </Link>
               <a
-                href="https://github.com/QebadiHice/dnipro"
+                href="https://github.com/QebadiHice75/dnipro"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 rounded-md border border-border px-8 py-3.5 text-sm font-semibold hover:bg-secondary transition-colors"

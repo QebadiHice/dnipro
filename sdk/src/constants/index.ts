@@ -2,15 +2,15 @@
 import { PublicKey } from '@solana/web3.js';
 
 // ── Program IDs ──────────────────────────────────────────────────────────────
-// Reference IDs only. Before deployment run `anchor keys sync` and `npm run sync:ids`
-// so the SDK matches the actual programs deployed by your wallet.
+// Fixed public Devnet identities used by the current Colosseum demo.
+// Keep these aligned with the existing Solana Playground projects.
 
 export const DISPATCHER_PROGRAM_ID = new PublicKey(
-  '9pBagrmLndcGR6fGBwaEqtuEb5qp1EipDX3mHh7VGJLQ'
+  'BfSctTciPvzNL3KwkNsQnqUmr5tK9R5B7zz6MCT845rt'
 );
 
 export const REGISTRY_PROGRAM_ID = new PublicKey(
-  'EXm2s98kb6eiYemAMc56NNF8wGHFW5NA4j4F9tpkp9ZS'
+  'JBSNe6wmCMiJXemkHm7qTRNFaPDd8sjJdwwjYGiAgkfe'
 );
 
 // ── Adapter Program IDs ───────────────────────────────────────────────────────
@@ -33,13 +33,18 @@ export const USDT_MINT = new PublicKey(
   'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'
 );
 
+
+export const DEVNET_USDC_MINT = new PublicKey(
+  '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU'
+);
+
 // ── PDA Seeds ─────────────────────────────────────────────────────────────────
 
 export const SEEDS = {
-  DISPATCHER_CONFIG: Buffer.from('dispatcher_config'),
-  REGISTRY_CONFIG: Buffer.from('registry_config'),
-  POSITION: Buffer.from('position'),
-  ADAPTER: Buffer.from('adapter'),
+  DISPATCHER_CONFIG: Buffer.from('dispatcher_config_v2'),
+  REGISTRY_CONFIG: Buffer.from('registry_config_v2'),
+  POSITION: Buffer.from('position_v2'),
+  ADAPTER: Buffer.from('adapter_v2'),
   PROPOSAL: Buffer.from('proposal'),
 } as const;
 

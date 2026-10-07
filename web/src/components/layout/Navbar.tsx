@@ -52,7 +52,7 @@ export function Navbar() {
 
           <div className="flex items-center gap-3">
             <a
-              href="https://github.com/QebadiHice/dnipro"
+              href="https://github.com/QebadiHice75/dnipro"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Dnipro on GitHub"

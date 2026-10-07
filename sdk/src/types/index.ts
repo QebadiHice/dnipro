@@ -1,15 +1,10 @@
-// sdk/src/types/index.ts
 import { PublicKey } from '@solana/web3.js';
 import BN from 'bn.js';
-
-// ── Program IDs ──────────────────────────────────────────────────────────────
 
 export interface ProgramIds {
   dispatcher: PublicKey;
   registry: PublicKey;
 }
-
-// ── Adapter ──────────────────────────────────────────────────────────────────
 
 export enum AdapterCategory {
   Lending = 0,
@@ -19,15 +14,25 @@ export enum AdapterCategory {
   Other = 4,
 }
 
+/**
+ * Registry record exposed by Dnipro v2.
+ * Legacy display fields are retained with neutral values so the existing CLI
+ * and documentation UI remain source-compatible while protocol-specific data
+ * is supplied by adapter metadata/indexing.
+ */
 export interface AdapterInfo {
   programId: PublicKey;
-  name: string;
-  protocol: string;
   underlyingMint: PublicKey;
+  adapterState: PublicKey;
+  adapterVault: PublicKey;
+  adapterVaultAuthority: PublicKey;
+  isActive: boolean;
+  name: string;
+
+  protocol: string;
   category: AdapterCategory;
   apyBps: number;
   tvl: BN;
-  isActive: boolean;
   depositsPaused: boolean;
   maxDeposit: BN;
   minDeposit: BN;
@@ -38,16 +43,13 @@ export interface AdapterInfo {
   riskScore: number;
 }
 
-// Augmented with computed display fields
 export interface AdapterDisplay extends AdapterInfo {
   apyPercent: string;
   tvlFormatted: string;
   categoryLabel: string;
   riskLabel: 'Low' | 'Medium' | 'High';
-  withdrawalDelay?: string; // e.g. "7 days" for Maple
+  withdrawalDelay?: string;
 }
-
-// ── Position ─────────────────────────────────────────────────────────────────
 
 export interface Position {
   owner: PublicKey;
@@ -66,49 +68,57 @@ export interface PositionWithValue extends Position {
   currentValue: BN;
   pnl: BN;
   pnlPercent: string;
-  adapterInfo: AdapterDisplay;
+  adapterInfo?: AdapterDisplay;
 }
-
-// ── Dispatcher Config ────────────────────────────────────────────────────────
 
 export interface DispatcherConfig {
   admin: PublicKey;
   registryProgram: PublicKey;
+  paused: boolean;
+  bump: number;
+  authorityBump: number;
+
+  // Compatibility fields for v0.1 callers. Devnet v2 currently charges no fee.
   feeBps: number;
   feeRecipient: PublicKey;
-  paused: boolean;
   totalDepositsUsd: BN;
   totalWithdrawalsUsd: BN;
   activePositions: BN;
   version: number;
 }
 
-// ── Registry Config ───────────────────────────────────────────────────────────
-
 export interface RegistryConfig {
   governance: PublicKey;
+  adapterCount: number;
+  bump: number;
+
+  // Compatibility fields retained for existing callers.
   pendingGovernance: PublicKey | null;
   timelockDelay: number;
-  adapterCount: number;
   activeCount: number;
   version: number;
 }
 
-// ── Instructions ─────────────────────────────────────────────────────────────
-
 export interface DepositParams {
   amount: BN;
   minSharesOut?: BN;
-  slippageBps?: number; // default 50 = 0.5%
+  slippageBps?: number;
 }
 
 export interface WithdrawParams {
-  shares: BN;            // 0 = withdraw all
+  /** v2 withdrawal amount in underlying base units. */
+  amount?: BN;
+  /** @deprecated v0.1 name; treated as amount by v2. */
+  shares: BN;
   minAmountOut?: BN;
   slippageBps?: number;
 }
 
-// ── Events ────────────────────────────────────────────────────────────────────
+export interface LiveRouteAccounts {
+  adapterState: PublicKey;
+  adapterVault: PublicKey;
+  adapterVaultAuthority: PublicKey;
+}
 
 export interface DepositEvent {
   user: PublicKey;
@@ -132,15 +142,11 @@ export interface WithdrawEvent {
   txSignature: string;
 }
 
-// ── SDK Options ───────────────────────────────────────────────────────────────
-
 export interface DniproClientOptions {
   programIds?: Partial<ProgramIds>;
   commitment?: 'processed' | 'confirmed' | 'finalized';
   preflightCommitment?: 'processed' | 'confirmed' | 'finalized';
 }
-
-// ── Simulation result ─────────────────────────────────────────────────────────
 
 export interface SimulationResult {
   estimatedOutput: BN;

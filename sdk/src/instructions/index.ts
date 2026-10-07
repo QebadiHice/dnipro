@@ -1,33 +1,26 @@
-// sdk/src/instructions/index.ts
 import {
   PublicKey,
   TransactionInstruction,
   SystemProgram,
-  SYSVAR_RENT_PUBKEY,
 } from '@solana/web3.js';
 import {
   TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
 } from '@solana/spl-token';
 import BN from 'bn.js';
-import { DISPATCHER_PROGRAM_ID, REGISTRY_PROGRAM_ID, BPS_DENOMINATOR } from '../constants';
+import { DISPATCHER_PROGRAM_ID, REGISTRY_PROGRAM_ID } from '../constants';
 import {
-  findDispatcherConfigPDA,
-  findRegistryConfigPDA,
-  findPositionPDA,
   findAdapterRecordPDA,
+  findDispatcherAuthorityPDA,
+  findDispatcherConfigPDA,
+  findPositionPDA,
+  findRegistryConfigPDA,
 } from '../accounts';
 import type { DepositParams, WithdrawParams } from '../types';
 
-// ── Anchor discriminator helper ───────────────────────────────────────────────
-
-function sighash(nameSpace: string, ixName: string): Buffer {
+function sighash(ixName: string): Buffer {
   const { createHash } = require('crypto');
-  const preimage = `${nameSpace}:${ixName}`;
-  return Buffer.from(
-    createHash('sha256').update(preimage).digest().slice(0, 8)
-  );
+  return Buffer.from(createHash('sha256').update(`global:${ixName}`).digest().subarray(0, 8));
 }
 
 function encodeU64(n: BN): Buffer {
@@ -36,212 +29,157 @@ function encodeU64(n: BN): Buffer {
   return buf;
 }
 
-function encodeU16(n: number): Buffer {
-  const buf = Buffer.alloc(2);
-  buf.writeUInt16LE(n);
-  return buf;
+function fixedName(name: string): Buffer {
+  const out = Buffer.alloc(32);
+  Buffer.from(name).subarray(0, 32).copy(out);
+  return out;
 }
 
-// ── Dispatcher: initialize ────────────────────────────────────────────────────
-
-export function buildInitializeDispatcherIx(params: {
-  admin: PublicKey;
-  registryProgram: PublicKey;
-  feeBps: number;
-  feeRecipient: PublicKey;
-}): TransactionInstruction {
-  const [configPDA] = findDispatcherConfigPDA();
-
-  const data = Buffer.concat([
-    sighash('global', 'initialize'),
-    params.registryProgram.toBuffer(),
-    encodeU16(params.feeBps),
-    params.feeRecipient.toBuffer(),
-  ]);
-
+export function buildInitializeRegistryIx(governance: PublicKey): TransactionInstruction {
+  const [config] = findRegistryConfigPDA();
   return new TransactionInstruction({
-    programId: DISPATCHER_PROGRAM_ID,
+    programId: REGISTRY_PROGRAM_ID,
     keys: [
-      { pubkey: configPDA,           isSigner: false, isWritable: true  },
-      { pubkey: params.admin,        isSigner: true,  isWritable: true  },
+      { pubkey: config, isSigner: false, isWritable: true },
+      { pubkey: governance, isSigner: true, isWritable: true },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],
-    data,
+    data: sighash('initialize_registry'),
   });
 }
 
-// ── Dispatcher: deposit ───────────────────────────────────────────────────────
+export function buildInitializeDispatcherIx(params: {
+  admin: PublicKey;
+  registryProgram?: PublicKey;
+  feeBps?: number;
+  feeRecipient?: PublicKey;
+}): TransactionInstruction {
+  const [config] = findDispatcherConfigPDA();
+  const [authority] = findDispatcherAuthorityPDA();
+  const registryProgram = params.registryProgram ?? REGISTRY_PROGRAM_ID;
+  return new TransactionInstruction({
+    programId: DISPATCHER_PROGRAM_ID,
+    keys: [
+      { pubkey: config, isSigner: false, isWritable: true },
+      { pubkey: authority, isSigner: false, isWritable: false },
+      { pubkey: params.admin, isSigner: true, isWritable: true },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    ],
+    data: Buffer.concat([sighash('initialize'), registryProgram.toBuffer()]),
+  });
+}
 
 export function buildDepositIx(params: {
   user: PublicKey;
   adapterProgramId: PublicKey;
   underlyingMint: PublicKey;
+  adapterState: PublicKey;
   adapterVault: PublicKey;
-  feeRecipientAccount: PublicKey;
+  adapterVaultAuthority: PublicKey;
   deposit: DepositParams;
+  feeRecipientAccount?: PublicKey;
 }): TransactionInstruction {
-  const [configPDA]   = findDispatcherConfigPDA();
-  const [positionPDA] = findPositionPDA(params.user, params.adapterProgramId);
-  const userATA       = getAssociatedTokenAddressSync(params.underlyingMint, params.user);
-
-  // Apply slippage
-  const slippageBps = params.deposit.slippageBps ?? 50;
-  const minSharesOut = params.deposit.minSharesOut
-    ?? params.deposit.amount.muln(BPS_DENOMINATOR - slippageBps).divn(BPS_DENOMINATOR);
-
-  const data = Buffer.concat([
-    sighash('global', 'deposit'),
-    encodeU64(params.deposit.amount),
-    encodeU64(minSharesOut),
-  ]);
+  const [config] = findDispatcherConfigPDA();
+  const [authority] = findDispatcherAuthorityPDA();
+  const [position] = findPositionPDA(params.user, params.adapterProgramId);
+  const [record] = findAdapterRecordPDA(params.adapterProgramId);
+  const userAta = getAssociatedTokenAddressSync(params.underlyingMint, params.user);
 
   return new TransactionInstruction({
     programId: DISPATCHER_PROGRAM_ID,
     keys: [
-      { pubkey: configPDA,                      isSigner: false, isWritable: false },
-      { pubkey: positionPDA,                    isSigner: false, isWritable: true  },
-      { pubkey: params.user,                    isSigner: true,  isWritable: true  },
-      { pubkey: userATA,                        isSigner: false, isWritable: true  },
-      { pubkey: params.feeRecipientAccount,     isSigner: false, isWritable: true  },
-      { pubkey: params.adapterVault,            isSigner: false, isWritable: true  },
-      { pubkey: params.underlyingMint,          isSigner: false, isWritable: false },
-      { pubkey: params.adapterProgramId,        isSigner: false, isWritable: false },
-      { pubkey: TOKEN_PROGRAM_ID,               isSigner: false, isWritable: false },
-      { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID,    isSigner: false, isWritable: false },
-      { pubkey: SystemProgram.programId,        isSigner: false, isWritable: false },
+      { pubkey: config, isSigner: false, isWritable: false },
+      { pubkey: position, isSigner: false, isWritable: true },
+      { pubkey: record, isSigner: false, isWritable: false },
+      { pubkey: params.adapterProgramId, isSigner: false, isWritable: false },
+      { pubkey: params.adapterState, isSigner: false, isWritable: true },
+      { pubkey: authority, isSigner: false, isWritable: false },
+      { pubkey: params.user, isSigner: true, isWritable: true },
+      { pubkey: userAta, isSigner: false, isWritable: true },
+      { pubkey: params.adapterVault, isSigner: false, isWritable: true },
+      { pubkey: params.adapterVaultAuthority, isSigner: false, isWritable: false },
+      { pubkey: params.underlyingMint, isSigner: false, isWritable: false },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],
-    data,
+    data: Buffer.concat([sighash('deposit'), encodeU64(params.deposit.amount)]),
   });
 }
-
-// ── Dispatcher: withdraw ──────────────────────────────────────────────────────
 
 export function buildWithdrawIx(params: {
   user: PublicKey;
   adapterProgramId: PublicKey;
   underlyingMint: PublicKey;
-  adapterVault: PublicKey;
-  feeRecipientAccount: PublicKey;
-  withdraw: WithdrawParams;
-}): TransactionInstruction {
-  const [configPDA]   = findDispatcherConfigPDA();
-  const [positionPDA] = findPositionPDA(params.user, params.adapterProgramId);
-  const userATA       = getAssociatedTokenAddressSync(params.underlyingMint, params.user);
-
-  const slippageBps = params.withdraw.slippageBps ?? 50;
-  const minAmountOut = params.withdraw.minAmountOut
-    ?? params.withdraw.shares.muln(BPS_DENOMINATOR - slippageBps).divn(BPS_DENOMINATOR);
-
-  const data = Buffer.concat([
-    sighash('global', 'withdraw'),
-    encodeU64(params.withdraw.shares),
-    encodeU64(minAmountOut),
-  ]);
-
-  return new TransactionInstruction({
-    programId: DISPATCHER_PROGRAM_ID,
-    keys: [
-      { pubkey: configPDA,                   isSigner: false, isWritable: true  },
-      { pubkey: positionPDA,                 isSigner: false, isWritable: true  },
-      { pubkey: params.user,                 isSigner: true,  isWritable: true  },
-      { pubkey: userATA,                     isSigner: false, isWritable: true  },
-      { pubkey: params.feeRecipientAccount,  isSigner: false, isWritable: true  },
-      { pubkey: params.adapterVault,         isSigner: false, isWritable: true  },
-      { pubkey: params.underlyingMint,       isSigner: false, isWritable: false },
-      { pubkey: params.adapterProgramId,     isSigner: false, isWritable: false },
-      { pubkey: TOKEN_PROGRAM_ID,            isSigner: false, isWritable: false },
-      { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: SystemProgram.programId,     isSigner: false, isWritable: false },
-    ],
-    data,
-  });
-}
-
-// ── Dispatcher: current_value ─────────────────────────────────────────────────
-
-export function buildCurrentValueIx(params: {
-  user: PublicKey;
-  adapterProgramId: PublicKey;
   adapterState: PublicKey;
+  adapterVault: PublicKey;
+  adapterVaultAuthority: PublicKey;
+  withdraw: WithdrawParams;
+  feeRecipientAccount?: PublicKey;
 }): TransactionInstruction {
-  const [configPDA]   = findDispatcherConfigPDA();
-  const [positionPDA] = findPositionPDA(params.user, params.adapterProgramId);
-
-  const data = Buffer.concat([
-    sighash('global', 'current_value'),
-    params.adapterProgramId.toBuffer(),
-  ]);
+  const [config] = findDispatcherConfigPDA();
+  const [authority] = findDispatcherAuthorityPDA();
+  const [position] = findPositionPDA(params.user, params.adapterProgramId);
+  const [record] = findAdapterRecordPDA(params.adapterProgramId);
+  const userAta = getAssociatedTokenAddressSync(params.underlyingMint, params.user);
+  const amount = params.withdraw.amount ?? params.withdraw.shares;
 
   return new TransactionInstruction({
     programId: DISPATCHER_PROGRAM_ID,
     keys: [
-      { pubkey: configPDA,               isSigner: false, isWritable: false },
-      { pubkey: positionPDA,             isSigner: false, isWritable: false },
-      { pubkey: params.user,             isSigner: true,  isWritable: false },
+      { pubkey: config, isSigner: false, isWritable: false },
+      { pubkey: position, isSigner: false, isWritable: true },
+      { pubkey: record, isSigner: false, isWritable: false },
       { pubkey: params.adapterProgramId, isSigner: false, isWritable: false },
-      { pubkey: params.adapterState,     isSigner: false, isWritable: false },
+      { pubkey: params.adapterState, isSigner: false, isWritable: true },
+      { pubkey: authority, isSigner: false, isWritable: false },
+      { pubkey: params.user, isSigner: true, isWritable: true },
+      { pubkey: userAta, isSigner: false, isWritable: true },
+      { pubkey: params.adapterVault, isSigner: false, isWritable: true },
+      { pubkey: params.adapterVaultAuthority, isSigner: false, isWritable: false },
+      { pubkey: params.underlyingMint, isSigner: false, isWritable: false },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],
-    data,
+    data: Buffer.concat([sighash('withdraw'), encodeU64(amount)]),
   });
 }
-
-// ── Registry: register_adapter ────────────────────────────────────────────────
 
 export function buildRegisterAdapterIx(params: {
   governance: PublicKey;
   adapterProgramId: PublicKey;
-  name: string;
-  protocol: string;
   underlyingMint: PublicKey;
-  category: number;
-  apyBps: number;
-  maxDeposit: BN;
-  minDeposit: BN;
-  metadataUri: string;
-  riskScore: number;
+  adapterState: PublicKey;
+  adapterVault: PublicKey;
+  adapterVaultAuthority: PublicKey;
+  name: string;
+  protocol?: string;
+  category?: number;
+  apyBps?: number;
+  maxDeposit?: BN;
+  minDeposit?: BN;
+  metadataUri?: string;
+  riskScore?: number;
 }): TransactionInstruction {
-  const [configPDA]  = findRegistryConfigPDA();
-  const [adapterPDA] = findAdapterRecordPDA(params.adapterProgramId);
-
-  // Encode name as fixed 64 bytes
-  const nameBuf = Buffer.alloc(64);
-  nameBuf.write(params.name.slice(0, 64));
-
-  const protocolBuf = Buffer.alloc(32);
-  protocolBuf.write(params.protocol.slice(0, 32));
-
-  const uriBuf = Buffer.alloc(128);
-  uriBuf.write(params.metadataUri.slice(0, 128));
-
-  const apyBuf = Buffer.alloc(4);
-  apyBuf.writeUInt32LE(params.apyBps);
-
-  const data = Buffer.concat([
-    sighash('global', 'register_adapter'),
-    params.adapterProgramId.toBuffer(),
-    // name as Borsh string (4-byte length prefix + bytes)
-    Buffer.from([params.name.length, 0, 0, 0]),
-    Buffer.from(params.name),
-    Buffer.from([params.protocol.length, 0, 0, 0]),
-    Buffer.from(params.protocol),
-    params.underlyingMint.toBuffer(),
-    Buffer.from([params.category]),
-    apyBuf,
-    encodeU64(params.maxDeposit),
-    encodeU64(params.minDeposit),
-    Buffer.from([params.metadataUri.length, 0, 0, 0]),
-    Buffer.from(params.metadataUri),
-    Buffer.from([params.riskScore]),
-  ]);
-
+  const [config] = findRegistryConfigPDA();
+  const [record] = findAdapterRecordPDA(params.adapterProgramId);
   return new TransactionInstruction({
     programId: REGISTRY_PROGRAM_ID,
     keys: [
-      { pubkey: configPDA,   isSigner: false, isWritable: true  },
-      { pubkey: adapterPDA,  isSigner: false, isWritable: true  },
+      { pubkey: config, isSigner: false, isWritable: true },
+      { pubkey: record, isSigner: false, isWritable: true },
+      { pubkey: params.adapterProgramId, isSigner: false, isWritable: false },
+      { pubkey: params.adapterState, isSigner: false, isWritable: false },
+      { pubkey: params.adapterVault, isSigner: false, isWritable: false },
+      { pubkey: params.adapterVaultAuthority, isSigner: false, isWritable: false },
+      { pubkey: params.underlyingMint, isSigner: false, isWritable: false },
       { pubkey: params.governance, isSigner: true, isWritable: true },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ],
-    data,
+    data: Buffer.concat([sighash('register_adapter'), fixedName(params.name)]),
   });
+}
+
+/** Dnipro v2 reads Position accounts directly instead of sending a current_value instruction. */
+export function buildCurrentValueIx(): TransactionInstruction {
+  throw new Error('Dnipro v2 reads the on-chain Position account directly; no current_value instruction is required.');
 }

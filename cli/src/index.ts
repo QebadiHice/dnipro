@@ -42,7 +42,7 @@ ${chalk.dim('Examples:')}
   ${chalk.cyan('dnipro withdraw kamino all')}     Withdraw all from Kamino
   ${chalk.cyan('dnipro portfolio')}               Show your yield positions
 
-${chalk.dim('Docs:')} https://github.com/QebadiHice/dnipro/tree/main/docs
+${chalk.dim('Docs:')} https://github.com/QebadiHice75/dnipro/tree/main/docs
 `);
 
 program.parse(process.argv);

@@ -3,131 +3,120 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Architecture — Dnipro',
-  description: 'Dnipro system architecture, reference implementation, and current limitations',
+  description: 'Dnipro v2 routing architecture, live Devnet adapter path, and current protocol-integration limits',
 };
 
 const SECTIONS = [
   {
     id: 'overview',
     title: 'System Overview',
-    content: `Dnipro is organized as **two core Anchor programs plus protocol-specific adapter programs**:
+    content: `Dnipro is organized as **two core Anchor programs plus adapter programs**:
 
-1. **Dispatcher** — the intended user-facing entry point for \`deposit()\`, \`withdraw()\`, and \`current_value()\` flows. It owns user position PDAs, applies configured fees, and routes calls to an adapter program.
+1. **Dispatcher** — the wallet-facing entry point for \`deposit(amount)\` and \`withdraw(amount)\`. It owns per-user position PDAs and performs CPI only after validating the selected route against Registry.
 
-2. **Registry** — a governance-controlled catalog for adapter metadata and status. The Registry and Dispatcher are separate in the current reference build; production routing must enforce registry membership and adapter status directly before a venue is treated as approved.
+2. **Registry** — a governance-controlled allowlist. Each record binds an adapter program to its underlying mint, state PDA, token vault, vault authority, and active status.
 
-3. **Adapters** — protocol-specific programs implementing the common three-function interface. The five included modules are **reference implementations**. A venue is not considered live until its real underlying-protocol CPI/accounts are implemented, tested on the target cluster, and its deployed program address is verified.`,
+3. **Adapters** — programs behind the common Dnipro route interface. The included **Dnipro USDC Devnet Vault** is the live end-to-end proof. Kamino, MarginFi, Jupiter, Maple/Syrup, and Drift remain reference integrations until their protocol-specific CPIs are implemented and verified.`,
   },
   {
     id: 'pda-model',
     title: 'PDA Model',
-    content: `All state is stored in deterministic Program Derived Addresses:
+    content: `The live v2 path uses deterministic Program Derived Addresses:
 
 | Account | Seeds | Program | Description |
 |---------|-------|---------|-------------|
-| \`DispatcherConfig\` | \`["dispatcher_config"]\` | Dispatcher | Global fee config, pause flag |
-| \`Position\` | \`["position", user, adapter_program_id]\` | Dispatcher | Per-user per-adapter yield position |
-| \`RegistryConfig\` | \`["registry_config"]\` | Registry | Governance authority, adapter count |
-| \`AdapterRecord\` | \`["adapter", adapter_program_id]\` | Registry | Per-adapter metadata and status |
-| \`GovernanceProposal\` | \`["proposal", proposal_id]\` | Registry | Timelock governance action |
-
-**Position PDAs** are unique per (user, adapter) pair — one user can have simultaneous positions across all five adapters, each tracked independently.`,
+| \`DispatcherConfig\` | \`["dispatcher_config_v2"]\` | Dispatcher | Admin, Registry program, pause state |
+| \`DispatcherAuthority\` | \`["dispatcher_authority_v2"]\` | Dispatcher | CPI signer accepted by adapters |
+| \`Position\` | \`["position_v2", user, adapter_program_id]\` | Dispatcher | Per-user per-adapter test-USDC position |
+| \`RegistryConfig\` | \`["registry_config_v2"]\` | Registry | Governance authority, adapter count |
+| \`AdapterRecord\` | \`["adapter_v2", adapter_program_id]\` | Registry | Program, mint, state, vault, authority, active status |
+| \`AdapterState\` | \`["adapter_state_v1"]\` | Adapter | Adapter admin/config and routed deposits |
+| \`AdapterVault\` | \`["vault_v1"]\` | Adapter | Program-controlled SPL-token vault |
+| \`VaultAuthority\` | \`["vault_authority_v1"]\` | Adapter | PDA that signs vault withdrawals |`,
   },
   {
     id: 'instruction-set',
     title: 'Instruction Set',
     content: `**Dispatcher Instructions:**
-- \`initialize(registry_program, fee_bps, fee_recipient)\` — admin only, called once
-- \`deposit(amount, min_shares_out)\` — route tokens to adapter, create/update Position
-- \`withdraw(shares, min_amount_out)\` — redeem shares from adapter, update Position
-- \`current_value(adapter_program_id)\` — read-only value query via CPI
-- \`update_config(fee_bps?, fee_recipient?, registry_program?)\` — admin gated
-- \`set_paused(paused)\` — emergency pause, admin gated
-- \`transfer_admin(new_admin)\` — two-step admin transfer
+- \`initialize(registry_program)\` — initializes v2 config and Dispatcher authority PDA
+- \`deposit(amount)\` — validates Registry record, CPIs to adapter, updates Position
+- \`withdraw(amount)\` — validates Registry record, CPIs to adapter, updates Position
+- \`set_paused(paused)\` — admin emergency control
 
 **Registry Instructions:**
-- \`initialize_registry(timelock_delay)\` — governance only
-- \`register_adapter(params)\` — governance gated, creates AdapterRecord PDA
-- \`update_adapter(params)\` — update APY, TVL, metadata
-- \`deactivate_adapter()\` — pause all deposits to this adapter
-- \`reactivate_adapter()\` — re-enable deposits
-- \`propose_governance_action(proposal_id, action)\` — submit timelock proposal
-- \`execute_governance_action()\` — execute after timelock elapsed
+- \`initialize_registry()\` — initializes governance config
+- \`register_adapter(name)\` — creates the Registry record for one deployed adapter
+- \`set_adapter_active(active)\` — governance-controlled route status
 
-**Adapter Interface (each adapter implements):**
-- \`adapter_deposit(amount, min_shares_out) → u64\` — returns shares minted
-- \`adapter_withdraw(shares, min_amount_out) → u64\` — returns tokens received
-- \`adapter_current_value(shares) → u64\` — returns current token value`,
+**Live adapter interface:**
+- \`initialize_adapter()\` — creates adapter state and SPL-token vault
+- \`adapter_deposit(amount)\` — receives tokens only from a CPI authorized by the Dispatcher PDA
+- \`adapter_withdraw(amount)\` — returns tokens from the vault using the adapter vault-authority PDA`,
   },
   {
-    id: 'fee-model',
-    title: 'Fee Model',
-    content: `Dnipro supports a configurable protocol fee on deposit and withdrawal flows. The initialization script currently uses **30 bps (0.30%)** as a reference configuration; production pricing should be validated with users and measured against transaction economics.
+    id: 'routing',
+    title: 'Registry-gated Routing',
+    content: `The Dispatcher does not accept an arbitrary adapter as a trusted route. Before CPI it derives the expected Registry record PDA and verifies:
 
-**Fee Formula:**
-\`\`\`
-fee = amount * fee_bps / 10_000
-net_amount = amount - fee
-\`\`\`
+- the Registry program owns the record;
+- the record was derived for the supplied adapter program;
+- the record's underlying mint matches the transaction mint;
+- the adapter state, vault, and vault-authority accounts match the registered accounts;
+- the adapter is active.
 
-Fees are collected into the configured fee-recipient token account. The economic model is intentionally configurable; Dnipro should not claim a break-even period until real venue yields, transaction costs, and user behavior are measured.
+Only after those checks does the Dispatcher sign the adapter CPI with \`dispatcher_authority_v2\`. The live adapter stores that authority during initialization and rejects direct withdrawal/deposit calls that do not carry the Dispatcher PDA signature.`,
+  },
+  {
+    id: 'live-demo',
+    title: 'Live Devnet Route',
+    content: `The current Colosseum demo uses Circle-compatible **Solana Devnet test USDC** and a Dnipro-owned vault adapter.
 
-Any production treasury or governance policy should be documented separately from this reference build.`,
+A successful live deposit proves:
+
+\`wallet → Dispatcher → Registry validation → adapter CPI → SPL vault → Position PDA → confirmed Solana signature\`
+
+A withdrawal follows the same path in reverse and is constrained by the user's Dispatcher position.
+
+The live vault is deliberately **not described as a yield-bearing protocol**. It proves the common routing standard and keeps protocol claims honest while the external venue adapters are completed.`,
   },
   {
     id: 'security',
     title: 'Security & Current Limits',
-    content: `**Controls represented in the reference build:**
-- Critical fee and position arithmetic uses checked or saturating operations where implemented
-- Deposit/withdraw interfaces include \`min_shares_out\` / \`min_amount_out\` parameters
-- Dispatcher configuration includes an emergency pause
-- Registry instructions are governance-authority gated
-- Registry code includes timelock proposal records for future governance execution flows
+    content: `**Controls in the live v2 demo path:**
+- Registry-gated adapter routing
+- Program-executable checks for registered adapters
+- Dispatcher-only adapter authorization through a PDA signer
+- Per-user Position PDAs
+- SPL token mint/authority constraints
+- Adapter active/inactive control
+- Dispatcher pause control
+- Checked arithmetic for position/vault accounting
 
-**Adapter boundaries:**
-- Each adapter is a separate on-chain program and can be deployed/upgraded independently
-- Position PDAs are owned by the Dispatcher rather than an adapter
-- Separation reduces coupling, but it is **not** a guarantee against a malicious or incorrectly wired CPI. Account constraints, registry enforcement, upgrade authorities, and integration tests remain essential.
-
-**Known limitations in this submission build:**
-- The included adapters model the Dnipro interface but do not yet perform the real underlying venue CPIs
-- Dispatcher deposit/withdraw do not yet receive Registry accounts, so adapter membership/status is not enforced in the routing path
-- Dispatcher CPI account lists do not yet match the richer account contexts required by the reference adapters
-- Adapter return values are not yet propagated into Dispatcher share accounting, so live position accounting is incomplete
-- \`current_value\` returns deposited principal as a baseline instead of consuming CPI return data
-- Governance proposal execution currently records execution state; it does not yet apply every proposed action automatically
-- No program in this repository should be represented as audited or production-ready until deployment, tests, and an external security review support that claim`,
+**Current limits:**
+- The Devnet vault is a routing proof, not an external yield strategy
+- Kamino, MarginFi, Jupiter, Maple/Syrup, and Drift are still reference integrations
+- The demo path uses a single underlying mint (Devnet USDC)
+- Upgrade authorities/governance are appropriate for a hackathon Devnet build, not a production treasury
+- No program in this repository should be represented as audited or mainnet-ready until independent review and protocol-specific testing support that claim`,
   },
   {
     id: 'adapter-interface',
     title: 'Adapter Interface Standard',
-    content: `Any Solana program can become a Dnipro adapter by implementing three instructions with the following Anchor discriminators and signatures:
+    content: `The v2 live adapter contract is intentionally small. A compatible adapter receives a Dispatcher-authority signer plus the user and token accounts:
 
 \`\`\`rust
-// Discriminator: sha256("global:adapter_deposit")[..8]
 pub fn adapter_deposit(
-    ctx: Context<AdapterDeposit>,
+    ctx: Context<RouteTokens>,
     amount: u64,
-    min_shares_out: u64,
-) -> Result<u64>  // returns shares minted
+) -> Result<()>
 
-// Discriminator: sha256("global:adapter_withdraw")[..8]  
 pub fn adapter_withdraw(
-    ctx: Context<AdapterWithdraw>,
-    shares: u64,
-    min_amount_out: u64,
-) -> Result<u64>  // returns tokens received
-
-// Discriminator: sha256("global:adapter_current_value")[..8]
-pub fn adapter_current_value(
-    ctx: Context<AdapterCurrentValue>,
-    shares: u64,
-) -> Result<u64>  // returns current token value
+    ctx: Context<RouteTokens>,
+    amount: u64,
+) -> Result<()>
 \`\`\`
 
-The adapter must also maintain an \`adapter_state\` PDA at seeds \`["adapter_state"]\` and a \`vault_authority\` PDA at \`["vault_authority"]\` to enable signed vault transfers.
-
-Use \`dnipro generate <name>\` to scaffold a complete adapter template.`,
+A production protocol adapter can replace the Devnet vault's direct SPL transfer with protocol-specific CPI while keeping the same Dispatcher-facing route. That is the core Dnipro abstraction: the app integrates the Dispatcher once while adapters absorb venue-specific account and instruction complexity.`,
   },
 ];
 
@@ -138,7 +127,7 @@ export default function ArchitecturePage() {
         <div className="mb-12">
           <h1 className="heading-serif text-4xl mb-3">Architecture</h1>
           <p className="text-muted-foreground text-lg">
-            Explore the Dnipro on-chain design, PDA model, reference interface, and the work remaining before production.
+            Explore the Dnipro v2 routing path, Registry-gated adapter model, live Devnet proof, and remaining production work.
           </p>
         </div>
 

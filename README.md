@@ -15,9 +15,9 @@ Yield integrations are fragmented. Each venue exposes different accounts, instru
 
 Dnipro separates that complexity into two layers:
 
-- **Dispatcher** — one transaction surface for deposit, withdraw, and position reads.
-- **Registry** — governance-controlled discovery and adapter metadata.
-- **Adapters** — protocol-specific programs that implement the same interface.
+- **Dispatcher** — one transaction surface for deposit/withdraw, Registry-gated routing, and per-user position PDAs.
+- **Registry** — governance-controlled adapter allowlist with program, mint, state, vault, and active-status records.
+- **Adapters** — programs behind the standard route interface. The included Devnet Vault is live; protocol-specific adapters remain reference integrations.
 - **SDK + CLI** — typed integration tooling for apps and adapter builders.
 - **Reference dashboard** — wallet-native UX that demonstrates the integration path.
 
@@ -29,31 +29,39 @@ Wallet / App / Treasury / CLI
             ▼
     ┌──────────────────┐       ┌──────────────────┐
     │    Dispatcher    │      ·│     Registry     │
-    │ deposit()        │ policy│ Adapter records  │
-    │ withdraw()       │ target│ Governance       │
-    │ current_value()  │       │ Timelock model   │
+    │ deposit()        │ verify│ Adapter records  │
+    │ withdraw()       │ route │ Governance       │
+    │ position PDA     │       │ Active status    │
     └────────┬─────────┘       └──────────────────┘
              │ CPI
       ┌──────┴──────────────────────────────┐
       │             Adapter layer          │
-      │ Kamino · MarginFi · Jupiter        │
-      │ Maple · Drift                      │
+      │ Live Devnet USDC Vault              │
+      │ Kamino · MarginFi · Jupiter · ...  │
       └─────────────────────────────────────┘
 ```
 
 ## Current build status
 
-Dnipro currently ships a complete reference architecture: Anchor dispatcher + registry programs, five adapter implementations, TypeScript SDK, CLI generator, docs, tests, and the Next.js reference dashboard.
+Dnipro now has two explicit layers:
 
-The adapter set is intentionally labelled **reference** until each underlying protocol CPI is completed, its account wiring matches the dispatcher path, Registry enforcement is added to routing, and the programs are deployed and tested. The dashboard also labels sample portfolio/APY data as demo data. We do not present simulated transactions as confirmed on-chain activity.
+- **Live Devnet route** — the deployed Dispatcher and Registry can route real **test USDC** into the included Dnipro Devnet Vault adapter, track the user's on-chain position, withdraw it, and expose the confirmed Solana signature in the dashboard.
+- **Protocol reference routes** — Kamino, MarginFi, Jupiter, Maple/Syrup, and Drift remain clearly labelled reference integrations until their protocol-specific CPIs and account sets are implemented and verified.
 
-Before a public demo, complete at least one adapter end-to-end, finish dispatcher↔registry enforcement and share accounting for that path, deploy to devnet, and publish the resulting Solana addresses/transaction links.
+The live vault is intentionally not described as yield-bearing. It proves the adapter standard and transaction path without making an unsupported protocol claim. See [`docs/live-devnet-demo.md`](docs/live-devnet-demo.md) for the Solana Playground + Vercel setup.
+
+Deployed core Devnet identities:
+
+```text
+Dispatcher: BfSctTciPvzNL3KwkNsQnqUmr5tK9R5B7zz6MCT845rt
+Registry:   JBSNe6wmCMiJXemkHm7qTRNFaPDd8sjJdwwjYGiAgkfe
+```
 
 ## Quick start
 
 ```bash
 # Clone
-git clone https://github.com/QebadiHice/dnipro.git
+git clone https://github.com/QebadiHice75/dnipro.git
 cd dnipro
 
 # Install workspace dependencies
@@ -70,26 +78,13 @@ yarn build:cli
 yarn dev
 ```
 
-### Anchor programs
+### On-chain programs
 
-```bash
-# Build programs and generate deploy keypairs
-anchor build
+The Colosseum Devnet build uses **Solana Playground** for deployment. The Dispatcher and Registry identities are already fixed to the public Devnet IDs shown above. Do **not** run `anchor keys sync` against those two programs unless you deliberately want to create different program identities.
 
-# IMPORTANT: sync declare_id! values with generated keypairs
-anchor keys sync
+For the live demo, upgrade the existing Playground projects with the current `programs/dispatcher/src/lib.rs` and `programs/registry/src/lib.rs`, then deploy the included `programs/adapters/devnet-vault` as a new Playground program. Full steps are in [`docs/live-devnet-demo.md`](docs/live-devnet-demo.md).
 
-# Propagate the synced public IDs into the SDK, scripts, tests, UI metadata
-npm run sync:ids
-
-# Rebuild after syncing program IDs
-anchor build
-
-# Run local integration tests
-anchor test
-```
-
-The public keys committed in this repository are **reference IDs only**. Run `anchor keys sync` followed by `npm run sync:ids` before your deployment. Commit only the resulting public addresses and source changes never private keypair files.
+Local Anchor builds remain useful for development if you maintain matching keypairs, but the browser deployment path is the canonical hackathon demo flow.
 
 ## SDK
 
@@ -146,7 +141,7 @@ See [`docs/colosseum-checklist.md`](docs/colosseum-checklist.md) for the remaini
 Dnipro is being prepared for **Crypto World's Fair 2026 / Colosseum** and **Superteam UK Build for Breakpoint**. Those programs are submission channels and communities around the project; they do not own or operate Dnipro.
 
 - X: [@angelraptumde](https://x.com/angelraptumde)
-- GitHub: [QebadiHice/dnipro](https://github.com/QebadiHice/dnipro)
+- GitHub: [QebadiHice75/dnipro](https://github.com/QebadiHice75/dnipro)
 
 ## Security
 

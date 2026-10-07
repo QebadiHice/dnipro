@@ -20,8 +20,7 @@
     "anchor:build": "anchor build",
     "anchor:test": "anchor test",
     "anchor:deploy": "anchor deploy",
-    "generate": "yarn workspace @dnipro/cli start generate",
-    "sync:ids": "node scripts/sync-public-ids.mjs"
+    "generate": "yarn workspace @dnipro/cli start generate"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "^0.31.1",
@@ -36,12 +35,12 @@
     "typescript": "^5.4.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/QebadiHice/dnipro.git"
+    "url": "https://github.com/QebadiHice75/dnipro.git"
   },
-  "homepage": "https://github.com/QebadiHice/dnipro#readme",
+  "homepage": "https://github.com/QebadiHice75/dnipro#readme",
   "license": "MIT"
 }

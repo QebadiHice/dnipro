@@ -6,20 +6,15 @@ const client = new DniproClient(connection);
 // Discover adapters registered with Dnipro
 const adapters = await client.getActiveAdapters();
 
-// Preview a deposit with the same interface every adapter uses
-const preview = await client.simulateDeposit(
-  ADAPTER_PROGRAM_IDS.kamino,
-  usdcToAtomics(100)
-);
-
-// After deployment, build the dispatcher transaction
+// The same Dispatcher surface is used for every verified adapter
 const tx = client.buildDepositTransaction({
   user: wallet.publicKey,
-  adapterProgramId: ADAPTER_PROGRAM_IDS.kamino,
-  underlyingMint: USDC_MINT,
+  adapterProgramId: LIVE_ADAPTER_PROGRAM_ID,
+  underlyingMint: DEVNET_USDC_MINT,
+  adapterState,
   adapterVault,
-  feeRecipientAccount,
-  deposit: { amount: usdcToAtomics(100) },
+  adapterVaultAuthority,
+  deposit: { amount: usdcToAtomics(1) },
 });`;
 
   return (
@@ -37,8 +32,8 @@ const tx = client.buildDepositTransaction({
               {[
                 { cmd: 'npm install @dnipro/sdk', desc: 'Install the TypeScript SDK' },
                 { cmd: 'dnipro generate my-protocol', desc: 'Scaffold a new adapter' },
-                { cmd: 'anchor build && anchor keys sync', desc: 'Generate and sync program IDs' },
-                { cmd: 'anchor deploy --provider.cluster devnet', desc: 'Deploy the demo safely first' },
+                { cmd: 'open playground/README.md', desc: 'Use the canonical Playground deploy flow' },
+                { cmd: 'yarn dev', desc: 'Run the wallet dashboard locally' },
               ].map(({ cmd, desc }) => (
                 <div key={cmd} className="flex items-center gap-4">
                   <code className="surface rounded-lg px-3 py-2 text-sm font-mono text-dnipro-300 flex-1">$ {cmd}</code>

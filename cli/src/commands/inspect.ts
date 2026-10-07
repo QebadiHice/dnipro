@@ -187,7 +187,7 @@ export const withdrawCommand = new Command('withdraw')
     console.log(`  Adapter: ${adapterArg}`);
     console.log(`  Shares:  ${sharesArg}`);
     console.log(chalk.dim('\nConnect your wallet in the Dnipro dashboard to execute.'));
-    console.log(chalk.cyan('  https://github.com/QebadiHice/dnipro#quick-start\n'));
+    console.log(chalk.cyan('  https://github.com/QebadiHice75/dnipro#quick-start\n'));
   });
 
 // ── register command ──────────────────────────────────────────────────────────
@@ -205,7 +205,7 @@ export const registerCommand = new Command('register')
     console.log('  2. Governance authority keypair');
     console.log('  3. Set the correct program ID in Anchor.toml\n');
     console.log(chalk.yellow('Interactive registration is not implemented in the CLI yet.'));
-    console.log(chalk.dim('For now, use the Anchor scripts in scripts/register-adapter.ts'));
+    console.log(chalk.dim('For the current Devnet demo, use the governed setup flow documented in playground/README.md.'));
   });
 
 function formatUsdc(amount: any): string {

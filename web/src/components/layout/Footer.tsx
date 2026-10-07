@@ -16,7 +16,7 @@ export function Footer() {
               One governed adapter layer for Solana yield integrations.
             </p>
             <div className="flex gap-3 mt-4">
-              <a href="https://github.com/QebadiHice/dnipro" target="_blank" rel="noopener noreferrer" aria-label="GitHub"
+              <a href="https://github.com/QebadiHice75/dnipro" target="_blank" rel="noopener noreferrer" aria-label="GitHub"
                 className="text-muted-foreground hover:text-foreground transition-colors">
                 <Github className="h-5 w-5" />
               </a>
@@ -45,7 +45,7 @@ export function Footer() {
               <li><Link href="/docs" className="hover:text-foreground transition-colors">Documentation</Link></li>
               <li><Link href="/examples" className="hover:text-foreground transition-colors">SDK examples</Link></li>
               <li><Link href="/docs/build-adapter" className="hover:text-foreground transition-colors">Build an adapter</Link></li>
-              <li><a href="https://github.com/QebadiHice/dnipro" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">GitHub ↗</a></li>
+              <li><a href="https://github.com/QebadiHice75/dnipro" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">GitHub ↗</a></li>
             </ul>
           </div>
 

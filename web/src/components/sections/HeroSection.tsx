@@ -74,7 +74,7 @@ export function HeroSection() {
                 Read the architecture
               </Link>
               <a
-                href="https://github.com/QebadiHice/dnipro"
+                href="https://github.com/QebadiHice75/dnipro"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 rounded-md border border-border px-6 py-3 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
